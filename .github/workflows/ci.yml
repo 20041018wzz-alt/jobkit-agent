@@ -8,6 +8,10 @@ on:
 jobs:
   test:
     runs-on: ${{ matrix.os }}
+    # Windows runner 的默认 stdout 是 cp1252：不加这两项，打印中文会抛 UnicodeEncodeError
+    env:
+      PYTHONUTF8: "1"
+      PYTHONIOENCODING: "utf-8"
     strategy:
       fail-fast: false
       matrix:

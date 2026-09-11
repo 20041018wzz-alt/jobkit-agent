@@ -17,6 +17,7 @@ import sys
 
 import config
 from agent import WzzAgent
+from console import enable_utf8
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -32,6 +33,7 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def main(argv: list[str] | None = None) -> int:
+    enable_utf8()  # Windows 控制台默认不是 UTF-8，打印中文前先兜底
     args = build_parser().parse_args(argv)
 
     if args.web:

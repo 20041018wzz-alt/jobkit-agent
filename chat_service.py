@@ -30,6 +30,9 @@ from pydantic import BaseModel, Field
 
 import config
 from agent import WzzAgent
+from console import enable_utf8
+
+enable_utf8()  # Windows 控制台默认编码下，中文日志/报错会抛 UnicodeEncodeError
 
 
 class TraceIdFilter(logging.Filter):

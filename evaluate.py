@@ -14,6 +14,7 @@ import sys
 
 import config
 from agent import WzzAgent
+from console import enable_utf8
 from llm import MockLLM, build_llm
 
 
@@ -79,6 +80,7 @@ def ratio(hit: int, total: int) -> str:
 
 
 def main(argv: list[str] | None = None) -> int:
+    enable_utf8()  # Windows 默认 cp1252/cp936 控制台：不改编码，打印中文会直接崩
     parser = argparse.ArgumentParser(description="wzz-agent 离线评测")
     parser.add_argument("--llm", action="store_true", help="用真实模型评测（需配置 API Key）")
     parser.add_argument("--verbose", action="store_true", help="逐题输出")
