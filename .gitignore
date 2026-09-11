@@ -1,0 +1,14 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+.env
+*.log
+.DS_Store
+.idea/
+.vscode/
+
+# 真实个人知识库与评测集：只留本地，绝不入库（开源用 data/knowledge 示例数据）
+data/knowledge.local/
+data/eval_set.local.json

@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>wzz-agent · 个人分身 Agent</title>
+<style>
+  :root {
+    --bg:#0e1320; --panel:#151c2c; --panel2:#1b2334; --line:#26304a;
+    --fg:#e9eef8; --mut:#8d99b3; --acc:#4f8cff; --acc2:#7aa2ff;
+    --ok:#37d18a; --warn:#ffb454; --bad:#ff6b6b; --gap:#a680ff;
+  }
+  * { box-sizing:border-box; }
+  html, body { margin:0; height:100%; }
+  body {
+    background:var(--bg); color:var(--fg); font:14px/1.6 "Microsoft YaHei", system-ui, -apple-system, sans-serif;
+    overflow:hidden;
+  }
+  button { font-family:inherit; cursor:pointer; }
+  input, select, textarea { font-family:inherit; }
+
+  /* ── 布局 ── */
+  .app { display:grid; grid-template-rows:auto 1fr; height:100vh; }
+  header {
+    display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+    padding:12px 18px; border-bottom:1px solid var(--line); background:var(--panel);
+  }
+  header h1 { margin:0; font-size:16px; letter-spacing:.3px; }
+  header h1 span { color:var(--acc2); }
+  .badges { display:flex; gap:8px; flex-wrap:wrap; margin-left:auto; }
+  .badge {
+    font-size:12px; color:var(--mut); border:1px solid var(--line);
+    border-radius:99px; padding:3px 10px; background:var(--panel2); white-space:nowrap;
+  }
+  .badge b { color:var(--fg); font-weight:600; }
+  .badge.mock { border-color:#5a4a1f; color:var(--warn); }
+  .badge.llm { border-color:#1f5a3a; color:var(--ok); }
+  .badge a { color:var(--acc2); text-decoration:none; }
+
+  main { display:grid; grid-template-columns:300px 1fr 330px; min-height:0; }
+  .col { min-height:0; display:flex; flex-direction:column; }
+  .col + .col { border-left:1px solid var(--line); }
+  .col-head {
+    display:flex; align-items:center; gap:8px; padding:10px 14px;
+    border-bottom:1px solid var(--line); font-size:13px; color:var(--mut); background:var(--panel);
+  }
+  .col-head b { color:var(--fg); font-weight:600; }
+  .col-body { overflow:auto; padding:12px 14px; flex:1; min-height:0; }
+  .col-body::-webkit-scrollbar, .chat::-webkit-scrollbar { width:9px; }
+  .col-body::-webkit-scrollbar-thumb, .chat::-webkit-scrollbar-thumb { background:#2b3550; border-radius:9px; }
+
+  /* ── 知识库面板 ── */
+  .search-row { display:flex; gap:6px; margin-bottom:10px; }
+  .search-row input { flex:1; }
+  input[type=text], input[type=number], select {
+    background:var(--panel2); border:1px solid var(--line); color:var(--fg);
+    border-radius:8px; padding:7px 10px; font-size:13px; width:100%;
+  }
+  input:focus, select:focus { outline:none; border-color:var(--acc); }
+  .doc-group { margin-bottom:14px; }
+  .doc-title { font-size:12px; color:var(--mut); margin:0 0 6px; letter-spacing:.5px; }
+  .entry {
+    display:flex; gap:8px; align-items:baseline; padding:6px 8px; border-radius:8px;
+    cursor:pointer; border:1px solid transparent;
+  }
+  .entry:hover { background:var(--panel2); border-color:var(--line); }
+  .entry.active { background:#1d2b47; border-color:var(--acc); }
+  .entry .id { font-size:11px; color:var(--acc2); font-family:Consolas, monospace; }
+  .entry .t { font-size:13px; }
+  .entry.gap .id { color:var(--gap); }
+  .entry .score { margin-left:auto; font-size:11px; color:var(--mut); }
+
+  /* ── 对话 ── */
+  .chat { flex:1; overflow:auto; padding:16px 20px; }
+  .msg { margin-bottom:16px; }
+  .who { font-size:12px; color:var(--mut); margin-bottom:6px; }
+  .bubble { border:1px solid var(--line); background:var(--panel); border-radius:12px; padding:12px 14px; }
+  .msg.user .bubble { background:#1b2740; border-color:#2f4368; }
+  .answer { white-space:pre-wrap; }
+  .status { font-size:12px; color:var(--warn); margin:4px 0; }
+  .steps { margin:2px 0 8px; }
+  .tool {
+    border:1px solid #234; background:#131c2c; border-radius:10px; padding:8px 10px; margin:6px 0;
+    font-size:12.5px;
+  }
+  .tool .tname { color:var(--ok); font-weight:600; }
+  .tool pre { margin:6px 0 0; white-space:pre-wrap; color:var(--mut); font-size:12px; }
+  .refs { margin-top:10px; padding-top:8px; border-top:1px dashed var(--line); font-size:12px; color:var(--mut); }
+  .ref {
+    display:inline-block; border:1px solid var(--line); border-radius:6px; padding:1px 7px;
+    margin:2px 6px 2px 0; cursor:pointer; color:var(--acc2);
+  }
+  .ref:hover { border-color:var(--acc); color:var(--fg); }
+  .flag { font-size:11px; border-radius:99px; padding:1px 8px; margin-left:6px; }
+  .flag.ok { color:var(--ok); border:1px solid #1f5a3a; }
+  .flag.gap { color:var(--gap); border:1px solid #3c2a66; }
+  .flag.bad { color:var(--bad); border:1px solid #5a2323; }
+  .composer { border-top:1px solid var(--line); padding:12px 20px; background:var(--panel); }
+  .composer .row { display:flex; gap:8px; }
+  .btn {
+    background:var(--acc); border:0; color:#fff; border-radius:9px; padding:9px 18px; font-size:14px;
+  }
+  .btn:disabled { opacity:.5; cursor:not-allowed; }
+  .btn.ghost { background:transparent; border:1px solid var(--line); color:var(--mut); padding:6px 12px; font-size:12px; }
+  .btn.ghost:hover { color:var(--fg); border-color:var(--acc); }
+  .samples { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:8px; }
+  .chip {
+    font-size:12px; color:var(--mut); border:1px dashed var(--line); border-radius:99px;
+    padding:3px 11px; cursor:pointer; background:transparent;
+  }
+  .chip:hover { color:var(--fg); border-color:var(--acc); }
+
+  /* ── 右侧工具台 / 指标 ── */
+  .tool-card { border:1px solid var(--line); border-radius:10px; padding:10px; margin-bottom:10px; background:var(--panel2); }
+  .tool-card h4 { margin:0 0 4px; font-size:13px; }
+  .tool-card p { margin:0 0 8px; font-size:12px; color:var(--mut); }
+  .tool-card .field { margin-bottom:6px; }
+  .tool-card label { display:block; font-size:11px; color:var(--mut); margin-bottom:3px; }
+  .tool-out { margin-top:8px; font-size:12px; white-space:pre-wrap; color:var(--fg); border-top:1px dashed var(--line); padding-top:8px; }
+  .metrics { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin:10px 0; }
+  .metric { border:1px solid var(--line); border-radius:10px; padding:8px 10px; background:var(--panel2); }
+  .metric .k { font-size:11px; color:var(--mut); }
+  .metric .v { font-size:17px; font-weight:600; }
+  .metric .v.ok { color:var(--ok); }
+  .metric .v.bad { color:var(--bad); }
+  table.rows { width:100%; border-collapse:collapse; font-size:11.5px; }
+  table.rows th, table.rows td { text-align:left; padding:3px 5px; border-bottom:1px solid var(--line); }
+  table.rows th { color:var(--mut); font-weight:500; }
+
+  /* ── 条目详情弹层 ── */
+  .modal {
+    position:fixed; inset:0; background:rgba(6,10,18,.72); display:none;
+    align-items:center; justify-content:center; padding:24px; z-index:50;
+  }
+  .modal.open { display:flex; }
+  .modal-box {
+    background:var(--panel); border:1px solid var(--line); border-radius:14px;
+    max-width:760px; width:100%; max-height:82vh; display:flex; flex-direction:column;
+  }
+  .modal-head { display:flex; align-items:center; gap:10px; padding:14px 18px; border-bottom:1px solid var(--line); }
+  .modal-head .id { font-family:Consolas, monospace; color:var(--acc2); font-size:12px; }
+  .modal-head h3 { margin:0; font-size:15px; }
+  .modal-body { padding:16px 18px; overflow:auto; white-space:pre-wrap; font-size:13px; }
+
+  @media (max-width: 1180px) {
+    main { grid-template-columns:1fr; }
+    .col + .col { border-left:0; border-top:1px solid var(--line); }
+    body { overflow:auto; }
+    .app { height:auto; }
+    .chat { max-height:60vh; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <h1>wzz-agent <span>· 个人分身 Agent</span></h1>
+    <div class="badges">
+      <div class="badge" id="b-mode">模式加载中…</div>
+      <div class="badge" id="b-kb">知识库 …</div>
+      <div class="badge" id="b-tools">工具 …</div>
+      <div class="badge" id="b-trace">trace -</div>
+      <div class="badge"><a href="/docs" target="_blank">API 文档</a></div>
+    </div>
+  </header>
+
+  <main>
+    <!-- 左：知识库 -->
+    <section class="col">
+      <div class="col-head"><b>知识库</b><span id="kb-meta"></span></div>
+      <div class="col-body">
+        <div class="search-row">
+          <input type="text" id="kb-q" placeholder="检索条目，如：切分 / 超卖 / 口径" />
+          <button class="btn ghost" id="kb-go">搜</button>
+        </div>
+        <div id="kb-list"></div>
+      </div>
+    </section>
+
+    <!-- 中：对话 -->
+    <section class="col">
+      <div class="col-head"><b>对话</b><span id="chat-hint">流式：状态 → 工具 → 回答 → 引用</span>
+        <button class="btn ghost" id="clear" style="margin-left:auto">清空</button></div>
+      <div class="chat" id="chat">
+        <div class="msg">
+          <div class="who">wzz-agent</div>
+          <div class="bubble">
+            <div class="answer">我是基于结构化个人知识库的分身 Agent。回答只用知识库里的条目，并标注来源；
+没有记录的（例如奖学金、实习、英语等级）我会直接说"记录里没有"，不会编。</div>
+          </div>
+        </div>
+      </div>
+      <div class="composer">
+        <div class="samples" id="samples"></div>
+        <div class="row">
+          <input type="text" id="q" placeholder="问点什么，例如：RAG 项目怎么切分文档？" autocomplete="off" />
+          <button class="btn" id="send">发送</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 右：工具台 + 指标 -->
+    <section class="col">
+      <div class="col-head"><b>工具台</b><span>Function Calling</span></div>
+      <div class="col-body">
+        <div id="tools"></div>
+        <div class="col-head" style="margin:0 -14px; border-top:1px solid var(--line)"><b>指标面板</b>
+          <span id="eval-set"></span></div>
+        <button class="btn" id="run-eval" style="width:100%; margin-top:10px">跑一次评测集</button>
+        <div class="metrics" id="metrics"></div>
+        <div id="rows"></div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div class="modal" id="modal">
+  <div class="modal-box">
+    <div class="modal-head">
+      <span class="id" id="m-id"></span><h3 id="m-title"></h3>
+      <button class="btn ghost" id="m-close" style="margin-left:auto">关闭</button>
+    </div>
+    <div class="modal-body" id="m-body"></div>
+  </div>
+</div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const DOC_LABEL = { profile: "档案 profile", projects: "项目 projects", job_search: "求职 job_search", manual: "手动追加" };
+const SAMPLES = [
+  "他熟悉哪些 AI 框架和工具？",
+  "RAG 项目怎么切分文档，召回率多少？",
+  "把 PROJECT-02 写进简历，给我条目",
+  "他简历里的数字口径有哪些冲突？",
+  "针对 PROJECT-01 出 5 道面试题",
+  "他拿过几次奖学金？",
+];
+const history = [];
+let KB = { entries: [], docs: [] };
+
+/* ── 通用请求 ── */
+async function api(path, options) {
+  const resp = await fetch(path, options);
+  const data = await resp.json().catch(() => ({}));
+  if (!resp.ok) throw new Error(data.error || `HTTP ${resp.status}`);
+  return data;
+}
+const el = (tag, cls, text) => { const n = document.createElement(tag); if (cls) n.className = cls; if (text !== undefined) n.textContent = text; return n; };
+
+/* ── 启动 ── */
+async function boot() {
+  try {
+    const meta = await api("/api/agent");
+    const badge = $("b-mode");
+    badge.textContent = `模式 ${meta.mode} · ${meta.model}`;
+    badge.classList.add(meta.mode === "mock" ? "mock" : "llm");
+    $("b-tools").textContent = `工具 ${meta.tools.length} 个`;
+    renderTools(meta.tools);
+    await loadKnowledge();
+  } catch (err) {
+    $("b-mode").textContent = "连接失败：" + err.message;
+  }
+  const samples = $("samples");
+  SAMPLES.forEach((s) => {
+    const chip = el("button", "chip", s);
+    chip.onclick = () => { $("q").value = s; ask(); };
+    samples.appendChild(chip);
+  });
+  if (new URLSearchParams(location.search).get("demo")) runDemo();
+}
+
+/* ── 知识库面板 ── */
+async function loadKnowledge(query) {
+  const data = await api("/api/knowledge" + (query ? `?q=${encodeURIComponent(query)}` : ""));
+  KB = data;
+  $("b-kb").textContent = `知识库 ${data.chunks} 条 · ${data.source === "local" ? "本地私有" : data.source === "sample" ? "示例数据" : "自定义目录"}`;
+  $("kb-meta").textContent = `${data.chunks} 条 · 阈值 ${data.threshold}`;
+  if (query && data.hits) {
+    $("kb-list").replaceChildren(groupEntries(data.hits.map((h) => ({ ...h, score: h.score })), true));
+    return;
+  }
+  $("kb-list").replaceChildren(groupEntries(data.entries, false));
+}
+
+function groupEntries(entries, showScore) {
+  const frag = document.createDocumentFragment();
+  if (!entries.length) {
+    frag.appendChild(el("p", "doc-title", "没有匹配的条目（说明知识库里没有这个主题）"));
+    return frag;
+  }
+  const byDoc = {};
+  entries.forEach((e) => { (byDoc[e.doc] = byDoc[e.doc] || []).push(e); });
+  Object.keys(byDoc).sort().forEach((doc) => {
+    const group = el("div", "doc-group");
+    group.appendChild(el("div", "doc-title", DOC_LABEL[doc] || doc));
+    byDoc[doc].forEach((e) => {
+      const row = el("div", "entry" + (e.is_gap ? " gap" : ""));
+      row.appendChild(el("span", "id", e.id));
+      row.appendChild(el("span", "t", e.title));
+      if (showScore && typeof e.score === "number") row.appendChild(el("span", "score", e.score.toFixed(2)));
+      row.onclick = () => openEntry(e.id, row);
+      group.appendChild(row);
+    });
+    frag.appendChild(group);
+  });
+  return frag;
+}
+
+async function openEntry(id, row) {
+  document.querySelectorAll(".entry.active").forEach((n) => n.classList.remove("active"));
+  if (row) row.classList.add("active");
+  try {
+    const entry = await api(`/api/knowledge/${id}`);
+    $("m-id").textContent = `[${entry.id}]`;
+    $("m-title").textContent = (DOC_LABEL[entry.doc] || entry.doc) + " · " + entry.title +
+      (entry.is_gap ? " · 缺失清单（不可作事实依据）" : "");
+    $("m-body").textContent = entry.text;
+    $("modal").classList.add("open");
+  } catch (err) {
+    $("m-id").textContent = "";
+    $("m-title").textContent = "读取失败";
+    $("m-body").textContent = err.message;
+    $("modal").classList.add("open");
+  }
+}
+
+/* ── 对话（SSE）── */
+function appendMessage(who, text, cls) {
+  const box = el("div", "msg " + (cls || ""));
+  box.appendChild(el("div", "who", who));
+  const bubble = el("div", "bubble");
+  const answer = el("div", "answer", text || "");
+  bubble.appendChild(answer);
+  box.appendChild(bubble);
+  $("chat").appendChild(box);
+  scrollChat();
+  return { box, bubble, answer };
+}
+
+function scrollChat() { const c = $("chat"); c.scrollTop = c.scrollHeight; }
+
+async function ask() {
+  const message = $("q").value.trim();
+  if (!message) return;
+  $("q").value = "";
+  $("send").disabled = true;
+  appendMessage("你", message, "user");
+  const reply = appendMessage("wzz-agent", "");
+  const statusBox = el("div", "status", "正在连接…");
+  reply.bubble.insertBefore(statusBox, reply.answer);
+  const toolsBox = el("div", "steps");
+  reply.bubble.insertBefore(toolsBox, reply.answer);
+
+  let answer = "";
+  try {
+    const resp = await fetch("/chat/stream", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message, history }),
+    });
+    const reader = resp.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = "";
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const parts = buffer.split("\n\n");
+      buffer = parts.pop();
+      for (const part of parts) {
+        if (!part.startsWith("data:")) continue;
+        const raw = part.slice(5).trim();
+        if (raw === "[DONE]") continue;
+        handleEvent(JSON.parse(raw), { statusBox, toolsBox, reply, message });
+      }
+      scrollChat();
+    }
+  } catch (err) {
+    statusBox.textContent = "请求失败：" + err.message;
+  }
+  scrollChat();
+  $("send").disabled = false;
+  $("q").focus();
+}
+
+function handleEvent(evt, refs) {
+  const { statusBox, toolsBox, reply } = refs;
+  if (evt.type === "session") {
+    $("b-trace").textContent = "trace " + evt.trace_id;
+  } else if (evt.type === "status") {
+    statusBox.textContent = evt.content;
+  } else if (evt.type === "tool") {
+    const card = el("div", "tool");
+    const head = el("div");
+    head.appendChild(el("span", "tname", "🛠 " + evt.name));
+    head.appendChild(el("span", "", " " + (evt.ok ? "成功" : "失败")));
+    card.appendChild(head);
+    if (evt.result) card.appendChild(el("pre", "", evt.result));
+    toolsBox.appendChild(card);
+  } else if (evt.type === "delta") {
+    refs.reply.answer.textContent += evt.content;
+  } else if (evt.type === "response") {
+    const data = evt.data;
+    refs.reply.answer.textContent = data.answer;
+    if (statusBox.parentNode) statusBox.remove();
+    const flags = el("div", "refs");
+    flags.appendChild(el("span", "flag " + (data.grounded ? "ok" : "bad"),
+      data.grounded ? "引用校验通过" : (data.has_knowledge ? "引用不完整" : "无记录")));
+    if (data.refused) flags.appendChild(el("span", "flag gap", "拒答：知识库里没有"));
+    if (data.invalid_citations.length) flags.appendChild(el("span", "flag bad", "剔除非法引用 " + data.invalid_citations.join("、")));
+    (data.references || []).forEach((r) => {
+      const chip = el("span", "ref", `[${r.id}] ${r.title}`);
+      chip.onclick = () => openEntry(r.id);
+      flags.appendChild(chip);
+    });
+    if (data.missing_facts && data.missing_facts.length) {
+      flags.appendChild(el("div", "", "未记录项：" + data.missing_facts.slice(0, 6).join("、")));
+    }
+    flags.appendChild(el("div", "", `已检索 ${data.retrieved.length} 条 · trace ${data.trace_id}`));
+    reply.bubble.appendChild(flags);
+    history.push({ role: "user", content: refs.message || "" });
+    history.push({ role: "assistant", content: data.answer });
+    if (history.length > 10) history.splice(0, history.length - 10);
+  }
+}
+
+/* ── 工具台 ── */
+function renderTools(tools) {
+  const box = $("tools");
+  box.replaceChildren();
+  tools.forEach((tool) => {
+    const card = el("div", "tool-card");
+    card.appendChild(el("h4", "", tool.name));
+    card.appendChild(el("p", "", tool.description));
+    const inputs = {};
+    const props = (tool.parameters && tool.parameters.properties) || {};
+    Object.keys(props).forEach((key) => {
+      const spec = props[key];
+      const field = el("div", "field");
+      field.appendChild(el("label", "", `${key}${(tool.parameters.required || []).includes(key) ? " *" : ""} · ${spec.type}`));
+      let input;
+      if (spec.enum) {
+        input = el("select");
+        const blank = el("option", "", "（默认）"); blank.value = ""; input.appendChild(blank);
+        spec.enum.forEach((v) => { const o = el("option", "", v); o.value = v; input.appendChild(o); });
+      } else {
+        input = el("input");
+        input.type = spec.type === "integer" ? "number" : "text";
+        input.placeholder = spec.description || "";
+      }
+      field.appendChild(input);
+      card.appendChild(field);
+      inputs[key] = { node: input, type: spec.type };
+    });
+    const run = el("button", "btn ghost", "执行");
+    const out = el("div", "tool-out");
+    run.onclick = async () => {
+      const payload = {};
+      Object.entries(inputs).forEach(([key, { node, type }]) => {
+        const value = node.value.trim();
+        if (value === "") return;
+        payload[key] = type === "integer" ? Number(value) : value;
+      });
+      run.disabled = true; out.textContent = "执行中…";
+      try {
+        const result = await api(`/api/tools/${tool.name}`, {
+          method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload),
+        });
+        out.textContent = result.text || JSON.stringify(result, null, 2);
+      } catch (err) {
+        out.textContent = "失败：" + err.message;
+      }
+      run.disabled = false;
+    };
+    card.appendChild(run);
+    card.appendChild(out);
+    box.appendChild(card);
+  });
+}
+
+/* ── 指标面板 ── */
+async function runEval() {
+  const btn = $("run-eval");
+  btn.disabled = true; btn.textContent = "评测中…";
+  try {
+    const data = await api("/api/evaluate", { method: "POST" });
+    const m = data.metrics;
+    $("eval-set").textContent = `${data.eval_set} · ${data.total} 题 · 知识库 ${data.knowledge_source}`;
+    const cards = [
+      ["检索命中率", `${m.recall_hit}/${m.recall_total}`, m.recall_hit === m.recall_total],
+      ["引用命中率", `${m.citation_hit}/${m.citation_total}`, m.citation_hit === m.citation_total],
+      ["拒答准确率", `${m.refusal_hit}/${m.refusal_total}`, m.refusal_hit === m.refusal_total],
+      ["幻觉题数", String(m.hallucinated), m.hallucinated === 0],
+      ["非法引用", String(m.invalid_citations), m.invalid_citations === 0],
+      ["模式", data.mode, true],
+    ];
+    const box = $("metrics");
+    box.replaceChildren();
+    cards.forEach(([k, v, good]) => {
+      const card = el("div", "metric");
+      card.appendChild(el("div", "k", k));
+      const val = el("div", "v " + (good ? "ok" : "bad"), v);
+      card.appendChild(val);
+      box.appendChild(card);
+    });
+    const table = el("table", "rows");
+    const head = el("tr");
+    ["题号", "问题", "结果"].forEach((h) => head.appendChild(el("th", "", h)));
+    table.appendChild(head);
+    data.rows.forEach((row) => {
+      const tr = el("tr");
+      tr.appendChild(el("td", "", row.id));
+      tr.appendChild(el("td", "", row.question.length > 14 ? row.question.slice(0, 14) + "…" : row.question));
+      const ok = row.expect_refusal ? row.refused : row.cited.length > 0;
+      tr.appendChild(el("td", "", ok ? "✓" : "✗"));
+      table.appendChild(tr);
+    });
+    $("rows").replaceChildren(table);
+  } catch (err) {
+    $("metrics").replaceChildren(el("div", "metric", "评测失败：" + err.message));
+  }
+  btn.disabled = false; btn.textContent = "跑一次评测集";
+}
+
+/* ── 截图演示模式 ── */
+async function runDemo() {
+  for (const message of ["把 PROJECT-02 写进简历，给我条目", "他拿过几次奖学金？"]) {
+    $("q").value = message;
+    await ask();
+    await new Promise((r) => setTimeout(r, 300));
+  }
+  runEval();
+}
+
+/* ── 事件绑定 ── */
+$("send").onclick = ask;
+$("q").addEventListener("keydown", (e) => { if (e.key === "Enter") ask(); });
+$("clear").onclick = () => { history.length = 0; $("chat").replaceChildren(); };
+$("kb-go").onclick = () => loadKnowledge($("kb-q").value.trim());
+$("kb-q").addEventListener("keydown", (e) => { if (e.key === "Enter") loadKnowledge($("kb-q").value.trim()); });
+$("run-eval").onclick = runEval;
+$("m-close").onclick = () => $("modal").classList.remove("open");
+$("modal").onclick = (e) => { if (e.target.id === "modal") $("modal").classList.remove("open"); };
+document.addEventListener("keydown", (e) => { if (e.key === "Escape") $("modal").classList.remove("open"); });
+
+boot();
+</script>
+</body>
+</html>

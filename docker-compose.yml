@@ -1,0 +1,13 @@
+services:
+  wzz-agent:
+    build: .
+    image: wzz-agent:1.0.0
+    container_name: wzz-agent
+    ports:
+      - "8100:8100"
+    env_file:
+      - .env
+    volumes:
+      # 知识库挂载为数据卷：改知识不用重新构建镜像
+      - ./data:/app/data
+    restart: unless-stopped
