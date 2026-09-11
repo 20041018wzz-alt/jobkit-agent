@@ -7,7 +7,7 @@
 把自己的档案、项目经历、求职材料切成**带编号的结构化知识条目**，用 **Function Calling** 调度工具，
 让 LLM **只依据检索到的条目作答、逐条标注来源**，没有依据时明确回答"记录里没有"；
 编造的条目号会在校验阶段被剔除。支持 **SSE 双流式（节点级状态 + token 级输出）**、
-**三栏 Web 工作台（知识库浏览 / 对话 / 工具台 + 在线评测面板）**、**45 个离线测试与 20 题评测**，
+**三栏 Web 工作台（知识库浏览 / 对话 / 工具台 + 在线评测面板）**、**47 个离线测试与 20 题评测**，
 **无 API Key、无 GPU 也能完整跑通（Mock 模式）**。
 
 > 与通用知识库问答的区别：它回答的每个事实都必须能溯源到个人知识库条目，引用不存在的条目号会被**校验阶段剔除**，
@@ -41,7 +41,7 @@
 - ✅ **引用合法性校验**：回答里不存在的 `[条目号]` 一律剔除并在响应中上报（`invalid_citations`）
 - 📡 **SSE 双流式**：`status` 节点级状态、`tool` 工具调用结果、`delta` token 级增量、`response` 校验后的最终结果
 - 🖥️ **三栏 Web 工作台**：知识库浏览 + 流式对话 + 工具台 + 在线评测面板（原生 JS，无构建步骤）
-- 🧪 **可测试可评测**：45 个离线 pytest + 20 题评测集（含 5 题"必须拒答"），`/api/evaluate` 可在页面上一键复跑
+- 🧪 **可测试可评测**：47 个离线 pytest + 20 题评测集（含 5 题"必须拒答"），`/api/evaluate` 可在页面上一键复跑
 - 🔌 **真实模型零改造**：DeepSeek 等 OpenAI 兼容接口；未配置 Key 时自动降级确定性 MockLLM，CI 不依赖网络与密钥
 - 🐳 **一键部署**：Dockerfile（非 root + HEALTHCHECK）+ docker-compose（知识库挂数据卷，改知识不用重建镜像）
 - 🔒 **隐私友好**：仓库只带**示例知识库**，真实档案放 `data/knowledge.local/`（已 gitignore），本地自动优先使用
@@ -142,7 +142,7 @@ Agent 主流程不需要任何改动；`python evaluate.py --llm` 可评估真�
 ## 🧪 测试与评测
 
 ```bash
-python -m pytest tests -q     # 45 个，全离线（知识库 13 / 工具 7 / Agent 13 / 接口 12）
+python -m pytest tests -q     # 47 个，全离线（知识库 13 / 工具 7 / Agent 13 / 接口 12 / 控制台 2）
 python evaluate.py            # 20 题评测（示例知识库与私有知识库上都跑通）
 ```
 
@@ -187,7 +187,8 @@ wzz-agent/
 │   ├── knowledge/       # 示例知识库（虚构人物，随仓库分发）
 │   ├── knowledge.local/ # 你自己的真实知识库（.gitignore，不入库）
 │   └── eval_set.json    # 20 题评测集（含 5 题必须拒答）
-├── tests/               # 45 个 pytest（知识库 / 工具 / Agent / 接口，全离线）
+├── console.py           # 控制台 UTF-8 兜底（Windows cp1252 下打印中文不再崩）
+├── tests/               # 47 个 pytest（知识库 / 工具 / Agent / 接口 / 控制台，全离线）
 ├── docs/screenshot.png  # 工作台截图
 ├── Dockerfile           # 非 root + HEALTHCHECK
 ├── docker-compose.yml   # 一键部署（知识库数据卷）
@@ -208,7 +209,7 @@ wzz-agent/
 > - 实现 **5 个 Function Calling 工具**（知识检索、STAR 简历条目生成、简历数字口径冲突检查、模拟面试出题、个人概览），
 >   工具调用循环设上限防止模型反复调用
 > - 前端 **三栏工作台**（知识库浏览 / SSE 流式对话 / 工具台 + 在线评测面板，原生 JS 无构建），
->   引用条目可点开核对原文；无 API Key 时自动降级确定性 MockLLM，**45 个 pytest 与评测全离线可复现**，
+>   引用条目可点开核对原文；无 API Key 时自动降级确定性 MockLLM，**47 个 pytest 与评测全离线可复现**，
 >   CI 在三平台 × 双 Python 版本运行；Dockerfile 非 root + HEALTHCHECK
 
 面试时可以重点讲的三个取舍（都是真实设计决策，不是包装）：
