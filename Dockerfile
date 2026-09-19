@@ -1,4 +1,4 @@
-# wzz-agent 生产镜像：非 root 运行 + 内置健康检查
+﻿# jobkit-agent 生产镜像：非 root 运行 + 内置健康检查
 FROM python:3.12-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1 \

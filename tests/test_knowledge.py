@@ -61,7 +61,7 @@ def test_by_doc_filters_domain(kb: KnowledgeBase):
 
 
 def test_context_block_carries_ids(kb: KnowledgeBase):
-    hits = kb.search("多智能体客服 性能", top_k=1, threshold=0.0)
+    hits = kb.search("售后工单 性能", top_k=1, threshold=0.0)
     block = kb.context_block(hits)
     assert "[PROJECT-01]" in block
 

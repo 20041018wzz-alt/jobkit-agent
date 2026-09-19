@@ -13,7 +13,7 @@ def test_health(client):
 
 def test_agent_metadata(client):
     body = client.get("/api/agent").json()
-    assert body["name"] == "wzz-agent"
+    assert body["name"] == "jobkit-agent"
     assert len(body["tools"]) == 5
     assert body["knowledge_chunks"] > 0
 
@@ -70,7 +70,7 @@ def test_knowledge_listing(client):
 def test_index_page_served(client):
     resp = client.get("/")
     assert resp.status_code == 200
-    assert "wzz-agent" in resp.text
+    assert "jobkit-agent" in resp.text
     # 页面必备的三个面板与 SSE 消费逻辑
     assert "知识库" in resp.text and "工具台" in resp.text and "/chat/stream" in resp.text
 

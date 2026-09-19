@@ -36,7 +36,7 @@ def test_tool_call_extracts_project_id(agent: WzzAgent):
     result = agent.answer("把 PROJECT-02 写进简历，给我条目")
     assert result["tool_calls"][0]["name"] == "draft_resume_bullet"
     assert result["tool_calls"][0]["args"] == {"project_id": "PROJECT-02"}
-    assert "RAG" in result["answer"]
+    assert "文档检索" in result["answer"]
 
 
 def test_tools_are_not_called_for_plain_questions(agent: WzzAgent):
@@ -110,7 +110,7 @@ def test_repeated_tool_calls_are_bounded(kb: KnowledgeBase):
 
 def test_metadata_describes_agent(agent: WzzAgent):
     meta = agent.metadata()
-    assert meta["name"] == "wzz-agent"
+    assert meta["name"] == "jobkit-agent"
     assert meta["mode"] == "mock"
     assert meta["knowledge_chunks"] == agent.kb.size()
     assert len(meta["tools"]) == 5

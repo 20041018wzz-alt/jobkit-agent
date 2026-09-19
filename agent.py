@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""wzz-agent 核心：个人分身 Agent。
+"""jobkit-agent 核心：求职材料与面试演练 Agent。
 
 一次问答的四个阶段：
   1. 检索     —— 从个人知识库取相关条目（分域、带条目号）
@@ -23,7 +23,7 @@ from tools import Tool, build_tools, tool_prompt_block
 
 CITATION_RE = re.compile(r"\[([A-Za-z]+-\d+)\]")
 
-PERSONA = """你是 wzz 的个人分身 Agent，运行在本机知识库之上。
+PERSONA = """你是 wzz 的求职材料与面试演练 Agent，运行在本机知识库之上。
 
 你的职责：
 - 准确回答关于 wzz 的教育背景、技能栈、项目经历、求职方向与材料规范的问题；
@@ -46,7 +46,7 @@ ACTION_RULES = """
 
 
 class WzzAgent:
-    """个人分身 Agent。"""
+    """求职材料与面试演练 Agent。"""
 
     def __init__(self, kb: Optional[KnowledgeBase] = None, llm: Optional[BaseLLM] = None,
                  top_k: Optional[int] = None, threshold: Optional[float] = None,

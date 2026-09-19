@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""wzz-agent 命令行入口。
+"""jobkit-agent 命令行入口。
 
 用法：
   python cli.py --ask "他熟悉哪些 AI 框架？"
@@ -21,7 +21,7 @@ from console import enable_utf8
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(prog="wzz-agent", description="个人分身 Agent（命令行）")
+    parser = argparse.ArgumentParser(prog="jobkit-agent", description="求职材料与面试演练 Agent（命令行）")
     parser.add_argument("--ask", metavar="QUESTION", help="提一个问题")
     parser.add_argument("--interview", metavar="PROJECT_ID", help="针对项目生成模拟面试题")
     parser.add_argument("--count", type=int, default=5, help="面试题数量（默认 5）")

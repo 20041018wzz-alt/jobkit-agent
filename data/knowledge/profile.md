@@ -2,7 +2,7 @@
 
 > 这是一个**示例知识库**，人物与联系方式均为虚构，用于开源演示与 CI。
 > 换成你自己的知识库：把真实文档放到 `data/knowledge.local/`（已在 .gitignore 中），
-> 或在 `.env` 里指定 `WZZ_KNOWLEDGE_DIR`。
+> 或在 `.env` 里指定 `JOBKIT_KNOWLEDGE_DIR`。
 
 ## [PROFILE-01] 基本信息
 
@@ -53,7 +53,7 @@
 - 要成品不要方案：直接产出可用文件，并给出完整路径
 - 简历必须一页，且要"占满一页"
 - 求职材料统一放 jl 目录；生成脚本放工作区根目录（python-docx）
-- 项目经历按 STAR 法则写，量化数据密集（4 秒 → 2 秒内、Recall@4 = 100%、34/26 个 pytest）
+- 项目经历按 STAR 法则写，量化数据密集（4 秒 → 2 秒内、Recall@4 = 100%、34/44 个 pytest）
 - 讲解材料要白话、易懂、带小标题
 - 环境为 Windows + PowerShell，JDK 17、Maven、MySQL、Tomcat 均在本机固定路径
 - 需要本人拍板的事（投哪家、删哪个项目）先问再动手

@@ -81,7 +81,7 @@ def ratio(hit: int, total: int) -> str:
 
 def main(argv: list[str] | None = None) -> int:
     enable_utf8()  # Windows 默认 cp1252/cp936 控制台：不改编码，打印中文会直接崩
-    parser = argparse.ArgumentParser(description="wzz-agent 离线评测")
+    parser = argparse.ArgumentParser(description="jobkit-agent 离线评测")
     parser.add_argument("--llm", action="store_true", help="用真实模型评测（需配置 API Key）")
     parser.add_argument("--verbose", action="store_true", help="逐题输出")
     args = parser.parse_args(argv)
@@ -90,7 +90,7 @@ def main(argv: list[str] | None = None) -> int:
     cases = load_cases()
     stats = evaluate(agent, cases, verbose=args.verbose)
 
-    print("\n=== wzz-agent 评测报告 ===")
+    print("\n=== jobkit-agent 评测报告 ===")
     print(f"模式: {'真实模型 ' + config.LLM_MODEL if args.llm else 'MockLLM（离线可复现）'}")
     print(f"知识条目: {agent.kb.size()} 条 | 评测题: {stats['total']} 题")
     print(f"检索命中率 Recall@{agent.top_k}: {ratio(stats['retrieval_hit'], stats['retrieval_cases'])}")

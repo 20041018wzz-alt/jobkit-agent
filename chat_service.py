@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""wzz-agent 服务层：FastAPI + SSE。
+"""jobkit-agent 服务层：FastAPI + SSE。
 
 接口：
 - GET  /                  Web 聊天界面（流式状态 + 工具调用 + 引用展示）
@@ -48,7 +48,7 @@ logging.basicConfig(level=config.LOG_LEVEL,
                     format="%(asctime)s [%(levelname)s] [trace=%(trace_id)s] %(message)s")
 for handler in logging.root.handlers:
     handler.addFilter(TraceIdFilter())
-logger = logging.getLogger("wzz-agent")
+logger = logging.getLogger("jobkit-agent")
 
 _agent: Optional[WzzAgent] = None
 
@@ -71,13 +71,13 @@ def new_trace_id() -> str:
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     get_agent()
-    logger.info("wzz-agent 服务启动：http://127.0.0.1:%d", config.PORT)
+    logger.info("jobkit-agent 服务启动：http://127.0.0.1:%d", config.PORT)
     yield
-    logger.info("wzz-agent 服务已关闭")
+    logger.info("jobkit-agent 服务已关闭")
 
 
 app = FastAPI(
-    title="wzz-agent · 个人分身 Agent",
+    title="jobkit-agent · 求职材料与面试演练 Agent",
     description="基于个人知识库的分身 Agent：结构化条目检索 + Function Calling + 引用溯源 + "
                 "无依据拒答。无 API Key 时自动进入 Mock 模式，全流程离线可跑。",
     version=config.AGENT_VERSION,
@@ -244,5 +244,5 @@ def _sse(payload: dict) -> str:
 if __name__ == "__main__":
     import uvicorn
 
-    logger.info("启动 wzz-agent：http://127.0.0.1:%d", config.PORT)
+    logger.info("启动 jobkit-agent：http://127.0.0.1:%d", config.PORT)
     uvicorn.run(app, host=config.HOST, port=config.PORT)

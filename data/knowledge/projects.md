@@ -1,13 +1,13 @@
 # 项目档案（示例知识库 · Sample Projects）
 
-## [PROJECT-01] 多智能体客服系统
+## [PROJECT-01] 售后工单分级处置 Agent
 
 - 时间与角色：2026.07–08，独立完成
 - 技术栈：LangGraph、FastAPI、DeepSeek API、MySQL、Redis、SSE、pytest
-- 定位：基于 LangGraph 的多智能体客服，Supervisor 意图分类 + 专家 Agent 条件路由
+- 定位：把售后工单按意图分级并路由到对应处置专家，Supervisor 意图分类 + 专家 Agent 条件路由
 - 要点：
   1. LLM 意图分类 + 标签归一化三层兜底；`out_of_scope` 固定话术护栏，不调用业务 LLM
-  2. 5 个专家 Agent（产品/技术/账单等）按意图条件路由
+  2. 5 个专家 Agent（产品/技术/账单/投诉/综合）按意图条件路由；业务数据为字典 Mock，未接真实业务系统（如实说明，勿夸大为已对接订单/CRM）
   3. 同步 Flask 改 FastAPI + httpx 异步：单轮响应从 4 秒级降到 2 秒内
   4. SSE 双流式：节点级状态 + token 级输出
   5. 会话记忆：MySQL 全量 + Redis 最近 5 轮（TTL 24h），未命中回源；存储故障降级到内存
@@ -15,21 +15,21 @@
   7. 34 个 pytest，MockLLM 只断言结构与路由，不断言文本，避免 LLM 非确定性导致 flaky
 - 面试考点：Supervisor vs Handoff vs 路由式；意图识别错误的兜底；多智能体防无限循环；SSE vs WebSocket；Redis 故障降级链路；LLM 输出的可测试性
 
-## [PROJECT-02] RAG 企业知识库问答 Agent
+## [PROJECT-02] 文档检索与引用溯源 Agent
 
-- 时间：2026.08；已开源
-- 仓库：github.com/example/rag-knowledge-agent
-- 技术栈：FastAPI、RAG、Embedding、Chroma、DeepSeek、Docker、GitHub Actions
+- 时间：2026.08；已开源（仓库已改名 citable-knowledge-agent）
+- 仓库：github.com/20041018wzz-alt/citable-knowledge-agent
+- 技术栈：FastAPI、RAG、Embedding、pgvector / Chroma / Memory、DeepSeek、Docker、GitHub Actions
 - 要点：
   1. 标题感知 + 重叠窗口的文档切分（约 500 字/块、重叠 50 字）；切分粒度 = 检索粒度
   2. Embedding 三后端（API / 本地 BGE / Mock）+ 工厂模式 + 失败自动降级
-  3. Chroma 不可用时降级纯 Python 内存向量库，保证 demo 可跑
+  3. 向量库三级降级：pgvector（生产，HNSW 余弦索引 + 维度守卫）→ Chroma（本地）→ 纯 Python 内存（兜底）
   4. Query Rewrite → top-k（默认 4）→ 相关性阈值兜底，低于阈值直接回"知识库中没有相关信息"
   5. 强制 `[n]` 引用标注并校验编号边界，防编造引用
   6. golden set 评测：Recall@4 = 5/5 = 100%
-  7. 26 个离线 pytest；Dockerfile 非 root + HEALTHCHECK + compose 数据卷
+  7. 44 个离线 pytest（含 19 个 pgvector 后端单测）；Dockerfile 非 root + HEALTHCHECK + compose（应用 + pgvector）数据卷
   8. 优化方向（尚未实现）：Rerank 重排、BM25 + 向量混合检索、Parent-child chunk、Token 级流式
-- 面试考点：切分粒度取舍；top-k 与阈值怎么定；RAG vs 微调；如何证明 RAG 靠谱；引用溯源防幻觉；向量库替换成本
+- 面试考点：切分粒度取舍；top-k 与阈值怎么定；RAG vs 微调；如何证明 RAG 靠谱；引用溯源防幻觉；向量库选型（pgvector vs Milvus vs Chroma）与迁移成本
 
 ## [PROJECT-03] 智能作业调度 Agent 系统
 
@@ -64,9 +64,9 @@
 
 | 项目 | 冲突口径 | 采用 |
 | --- | --- | --- |
-| 多智能体客服系统 pytest 数 | 27 / 34 | 34 |
-| RAG 知识库 Agent pytest 数 | 16 / 25 / 26 | 26 |
-| RAG GitHub 链接 | 仅部分版本写了 | 写 |
-| 期望工作地 | 杭州 / 上海 | 按岗位版本决定 |
+| 售后工单分级处置 Agent pytest 数 | 27 / 34 | 34 |
+| 文档检索与引用溯源 Agent pytest 数 | 16 / 25 / 26 / 44 | 44（含 19 个 pgvector 后端单测） |
+| 文档检索与引用溯源 Agent 向量库 | 仅写 Chroma / pgvector→Chroma→Memory 三级降级 | 写三级降级（pgvector 为生产） |
+| 期望工作地 | 杭州 / 上海 / 武汉 | 按岗位版本决定 |
 
 规则：发现版本间数字打架时明确指出并让本人拍板，不自行抹平；改完统一回填所有版本。

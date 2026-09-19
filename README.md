@@ -1,6 +1,6 @@
-# wzz-agent · 个人分身 Agent
+# jobkit-agent · 求职材料与面试演练 Agent
 
-[![CI](https://github.com/20041018wzz-alt/wzz-agent/actions/workflows/ci.yml/badge.svg)](https://github.com/20041018wzz-alt/wzz-agent/actions/workflows/ci.yml)
+[![CI](https://github.com/20041018wzz-alt/jobkit-agent/actions/workflows/ci.yml/badge.svg)](https://github.com/20041018wzz-alt/jobkit-agent/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](pyproject.toml)
 
@@ -15,7 +15,7 @@
 
 ## 📸 界面预览
 
-![wzz-agent 工作台](docs/screenshot.png)
+![jobkit-agent 工作台](docs/screenshot.png)
 
 三栏工作台（`python chat_service.py` → http://127.0.0.1:8100）：
 
@@ -76,7 +76,7 @@ flowchart LR
 ## 🚀 快速开始（Mock 模式，零配置）
 
 ```bash
-cd wzz-agent
+cd jobkit-agent
 pip install -r requirements.txt
 
 # 1. 命令行问答
@@ -107,7 +107,7 @@ cp 你的求职.md data/knowledge.local/job_search.md
 cp 你的评测集.json data/eval_set.local.json          # 可选：对应你自己的 20 题
 
 # 方式二：用环境变量指向任意目录
-WZZ_KNOWLEDGE_DIR=/path/to/my/kb python chat_service.py
+JOBKIT_KNOWLEDGE_DIR=/path/to/my/kb python chat_service.py
 ```
 
 加载了哪一份，页头与 `/api/agent` 都会显示（`本地私有` / `示例数据`）。
@@ -149,7 +149,7 @@ python evaluate.py            # 20 题评测（示例知识库与私有知识库
 实际输出（MockLLM，`data/eval_set.json` 20 题）：
 
 ```
-=== wzz-agent 评测报告 ===
+=== jobkit-agent 评测报告 ===
 模式: MockLLM（离线可复现）
 知识条目: 19 条 | 评测题: 20 题
 检索命中率 Recall@4: 15/15 = 100.00%
@@ -173,7 +173,7 @@ docker compose up -d --build      # http://localhost:8100/docs
 ## 📁 项目结构
 
 ```
-wzz-agent/
+jobkit-agent/
 ├── config.py            # 配置解析（环境变量 + .env；知识库三级解析：env > 本地私有 > 示例）
 ├── knowledge.py         # 条目切分 + 检索（IDF 覆盖率主分 / BM25 次分 / 缺失词表）
 ├── llm.py               # LLM 抽象：OpenAI 兼容客户端 + 确定性 MockLLM + 提示词协议解析
@@ -197,7 +197,7 @@ wzz-agent/
 
 ## 🎯 项目经历怎么写进简历（可直接粘贴）
 
-> **wzz-agent 个人分身 Agent｜2026.09｜独立开发**
+> **jobkit-agent 求职材料与面试演练 Agent｜2026.09｜独立开发**
 > 技术栈：Python、FastAPI、Function Calling、SSE、BM25/IDF 检索、Docker、GitHub Actions、pytest
 > - 设计并实现基于结构化个人知识库的分身 Agent：把档案/项目/求职材料切成带编号的知识条目，
 >   模型只依据检索到的条目作答并标注来源，**切分粒度 = 检索粒度**，引用可逐条溯源

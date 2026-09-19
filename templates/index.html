@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>wzz-agent · 个人分身 Agent</title>
+<title>jobkit-agent · 求职材料与面试演练 Agent</title>
 <style>
   :root {
     --bg:#0e1320; --panel:#151c2c; --panel2:#1b2334; --line:#26304a;
@@ -154,7 +154,7 @@
 <body>
 <div class="app">
   <header>
-    <h1>wzz-agent <span>· 个人分身 Agent</span></h1>
+    <h1>jobkit-agent <span>· 求职材料与面试演练 Agent</span></h1>
     <div class="badges">
       <div class="badge" id="b-mode">模式加载中…</div>
       <div class="badge" id="b-kb">知识库 …</div>
@@ -183,7 +183,7 @@
         <button class="btn ghost" id="clear" style="margin-left:auto">清空</button></div>
       <div class="chat" id="chat">
         <div class="msg">
-          <div class="who">wzz-agent</div>
+          <div class="who">jobkit-agent</div>
           <div class="bubble">
             <div class="answer">我是基于结构化个人知识库的分身 Agent。回答只用知识库里的条目，并标注来源；
 没有记录的（例如奖学金、实习、英语等级）我会直接说"记录里没有"，不会编。</div>
@@ -345,7 +345,7 @@ async function ask() {
   $("q").value = "";
   $("send").disabled = true;
   appendMessage("你", message, "user");
-  const reply = appendMessage("wzz-agent", "");
+  const reply = appendMessage("jobkit-agent", "");
   const statusBox = el("div", "status", "正在连接…");
   reply.bubble.insertBefore(statusBox, reply.answer);
   const toolsBox = el("div", "steps");

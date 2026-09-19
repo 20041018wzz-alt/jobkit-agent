@@ -19,7 +19,7 @@ def test_registry_exposes_five_tools(kb: KnowledgeBase):
 def test_draft_resume_bullet_keeps_quantified_bullets(kb: KnowledgeBase):
     result = build_tools(kb)["draft_resume_bullet"].run(project_id="PROJECT-02")
     assert result["ok"] is True
-    assert "RAG" in result["data"]["header"]
+    assert "文档检索" in result["data"]["header"]
     assert result["data"]["bullets"]
     assert any(any(ch.isdigit() for ch in bullet) for bullet in result["data"]["bullets"])
 
