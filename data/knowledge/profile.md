@@ -2,7 +2,7 @@
 
 > 这是一个**示例知识库**，人物与联系方式均为虚构，用于开源演示与 CI。
 > 换成你自己的知识库：把真实文档放到 `data/knowledge.local/`（已在 .gitignore 中），
-> 或在 `.env` 里指定 `JOBKIT_KNOWLEDGE_DIR`。
+> 或在 `.env` 里指定 `WZZ_KNOWLEDGE_DIR`。
 
 ## [PROFILE-01] 基本信息
 

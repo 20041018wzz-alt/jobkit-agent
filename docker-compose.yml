@@ -1,8 +1,8 @@
 services:
-  jobkit-agent:
+  wzz-agent:
     build: .
-    image: jobkit-agent:1.0.0
-    container_name: jobkit-agent
+    image: wzz-agent:1.0.0
+    container_name: wzz-agent
     ports:
       - "8100:8100"
     env_file:

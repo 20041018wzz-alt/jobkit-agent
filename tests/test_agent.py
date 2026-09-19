@@ -110,7 +110,7 @@ def test_repeated_tool_calls_are_bounded(kb: KnowledgeBase):
 
 def test_metadata_describes_agent(agent: WzzAgent):
     meta = agent.metadata()
-    assert meta["name"] == "jobkit-agent"
+    assert meta["name"] == "wzz-agent"
     assert meta["mode"] == "mock"
     assert meta["knowledge_chunks"] == agent.kb.size()
     assert len(meta["tools"]) == 5

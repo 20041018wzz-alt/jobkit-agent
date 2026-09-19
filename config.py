@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""jobkit-agent 配置。
+"""wzz-agent 配置。
 
 所有配置来自环境变量（支持同目录 .env 文件，零依赖解析），默认值保证
 **无 API Key 也能完整跑通**（Mock 模式）。
@@ -42,7 +42,7 @@ def _has_markdown(directory: Path) -> bool:
     return directory.is_dir() and any(directory.glob("*.md"))
 
 
-_ENV_KNOWLEDGE = os.getenv("JOBKIT_KNOWLEDGE_DIR", "").strip()
+_ENV_KNOWLEDGE = os.getenv("WZZ_KNOWLEDGE_DIR", "").strip()
 if _ENV_KNOWLEDGE:
     KNOWLEDGE_DIR = Path(_ENV_KNOWLEDGE)
     KNOWLEDGE_SOURCE = "env"
@@ -53,7 +53,7 @@ else:
     KNOWLEDGE_DIR = SAMPLE_KNOWLEDGE_DIR
     KNOWLEDGE_SOURCE = "sample"
 
-_ENV_EVAL_SET = os.getenv("JOBKIT_EVAL_SET", "").strip()
+_ENV_EVAL_SET = os.getenv("WZZ_EVAL_SET", "").strip()
 if _ENV_EVAL_SET:
     EVAL_SET_PATH = Path(_ENV_EVAL_SET)
 elif KNOWLEDGE_SOURCE == "local" and LOCAL_EVAL_SET.exists():
@@ -78,7 +78,7 @@ FORCE_MOCK = os.getenv("LLM_MOCK", "").lower() in {"1", "true", "yes", "on"}
 USE_MOCK = FORCE_MOCK or not LLM_API_KEY
 
 # ── Agent 行为 ──────────────────────────────────────────────────────────────
-AGENT_NAME = os.getenv("AGENT_NAME", "jobkit-agent")
+AGENT_NAME = os.getenv("AGENT_NAME", "wzz-agent")
 AGENT_VERSION = "1.0.0"
 MAX_TOOL_STEPS = int(os.getenv("MAX_TOOL_STEPS", "3"))
 MAX_HISTORY = int(os.getenv("MAX_HISTORY", "10"))

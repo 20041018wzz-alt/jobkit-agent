@@ -3,9 +3,9 @@ requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "jobkit-agent"
+name = "wzz-agent"
 version = "1.0.0"
-description = "求职材料与面试演练 Agent：结构化个人知识库 + Function Calling + 引用溯源 + 无依据拒答"
+description = "个人分身 Agent：结构化个人知识库 + Function Calling + 引用溯源 + 无依据拒答"
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }
@@ -22,7 +22,7 @@ dependencies = [
 dev = ["pytest>=8.0"]
 
 [project.scripts]
-jobkit-agent = "cli:main"
+wzz-agent = "cli:main"
 
 [tool.setuptools]
 py-modules = ["agent", "chat_service", "cli", "config", "evaluate", "knowledge", "llm", "tools"]

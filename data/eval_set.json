@@ -1,5 +1,5 @@
 {
-  "description": "求职材料与面试演练 Agent 评测集（示例知识库版本）：15 题事实引用 + 5 题必须拒答",
+  "description": "个人分身 Agent 评测集（示例知识库版本）：15 题事实引用 + 5 题必须拒答",
   "cases": [
     {"id": "E01", "question": "他是哪个学校什么专业的？", "expect_ids": ["PROFILE-01"], "expect_refusal": false},
     {"id": "E02", "question": "他哪一年毕业？", "expect_ids": ["PROFILE-01"], "expect_refusal": false},
